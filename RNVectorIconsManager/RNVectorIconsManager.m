@@ -73,11 +73,13 @@ RCT_EXPORT_MODULE();
     NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:glyph attributes:@{NSFontAttributeName: font, NSForegroundColorAttributeName: color}];
 
     CGSize iconSize = [attributedString size];
-    UIGraphicsBeginImageContextWithOptions(iconSize, NO, 0.0);
-    [attributedString drawAtPoint:CGPointMake(0, 0)];
-    
-    UIImage *iconImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
+    UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat];
+    format.scale = 0.0; // 0.0 表示使用屏幕的自然比例
+
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:iconSize format:format];
+    UIImage *iconImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull rendererContext) {
+      [attributedString drawAtPoint:CGPointMake(0, 0)];
+    }];
   
     NSData *imageData = UIImagePNGRepresentation(iconImage);
     return [imageData writeToFile:filePath atomically:YES];
